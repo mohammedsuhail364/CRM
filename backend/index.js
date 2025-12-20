@@ -37,6 +37,16 @@ app.use("/customer", customerRoutes);
 app.use("/employee", ticketRoutes);
 app.use("/admin", adminRoutes);
 
+if (process.env.NODE_ENV === "production") {
+  const clientPath = path.join(__dirname, "../frontend/dist");
+
+  app.use(express.static(clientPath));
+
+  // SPA fallback (THIS is the key)
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(clientPath, "index.html"));
+  });
+}
 
 const startServer = async () => {
   try {
