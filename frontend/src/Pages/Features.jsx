@@ -1,137 +1,123 @@
-import  { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useAuth } from "../Context/AuthContext";
 
 const featuresData = [
   {
     title: "Minimal UI",
-    description:
-     "Effortless & intuitive, simsERP POS keeps it simple. No clutter—just the essentials to run your business smoothly.",
+    description: "Effortless & intuitive, simsERP POS keeps it simple. No clutter—just the essentials to run your business smoothly.",
+    icon: "🎯"
   },
   {
-    title: "POS",
-    description:
-      "simsERP POS simplifies sales. Manage orders, categories . Send to kitchen instantly & accept payments securely. All-in-one for a smooth flow.",
+    title: "POS System",
+    description: "simsERP POS simplifies sales. Manage orders, categories. Send to kitchen instantly & accept payments securely.",
+    icon: "💳"
   },
   {
     title: "Live Updates",
-    description:
-      "Kitchen in Sync, Never miss a beat. Live order updates send details directly to your kitchen, ensuring accuracy and minimizing prep time.",
+    description: "Kitchen in Sync. Live order updates send details directly to your kitchen, ensuring accuracy and minimizing prep time.",
+    icon: "⚡"
   },
+  {
+    title: "Inventory Tracking",
+    description: "Real-time stock monitoring. Get alerts on low inventory and automate reordering to never run out of supplies.",
+    icon: "📦"
+  },
+  {
+    title: "Customer Analytics",
+    description: "Understand your customers better. Track purchase patterns, preferences, and loyalty to boost retention.",
+    icon: "📊"
+  },
+  {
+    title: "Multi-Location Support",
+    description: "Manage multiple outlets from one dashboard. Centralized control with location-specific customization.",
+    icon: "🏪"
+  }
 ];
 
 const Features = () => {
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-  const {setCompanyName}=useAuth();
-  useEffect(()=>{
-      setCompanyName(null)
-    },[])
+  const { setCompanyName } = useAuth();
+  
+  useEffect(() => {
+    setCompanyName(null);
+  }, []);
+
   return (
-    <section className="relative bg-[#F8FAFC] min-h-screen flex flex-col items-center justify-center p-12 px-6">
-      {/* Large Screen Section */}
-      <div className="hidden md:block w-full">
-        <div className="text-center mb-12">
-          <motion.h1
-            className="text-6xl font-extrabold tracking-wide uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#1E40AF] to-[#F59E0B]"
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            Discover Our Features
-          </motion.h1>
-          <motion.p
-            className="mt-4 text-lg max-w-3xl mx-auto text-gray-700"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2 }}
-          >
-            Explore the powerful tools that make simsERP an essential solution for your business growth.
-          </motion.p>
-        </div>
-        <div className="container mx-auto grid grid-cols-3 gap-8">
-          {featuresData.map((feature, index) => (
-            <motion.div
-              key={index}
-              className="relative bg-white shadow-xl rounded-xl text-center border-b-4 border-[#1E40AF] transition-all duration-500 hover:shadow-2xl hover:border-[#F59E0B] p-8"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              <motion.h3
-                className="text-3xl font-semibold text-black transition-all duration-500"
-                animate={{ color: hoveredIndex === index ? "#F59E0B" : "#1E40AF" }}
-              >
-                {feature.title}
-              </motion.h3>
-              <motion.div
-  className="absolute inset-0 bg-[#F8FAFC] opacity-90 rounded-xl p-6 flex items-center justify-center text-gray-700"
-  initial={{ opacity: 0, scale: 0.9, padding: "1.5rem" }} // Smaller padding initially
-  animate={
-    hoveredIndex === index
-      ? { opacity: 1, scale: window.innerWidth >= 768 ? 1.1 : 1.05, padding: "2.5rem" } // Increased scale & padding
-      : { opacity: 0, scale: 0.9, padding: "1.5rem" }
-  }
-  transition={{ duration: 0.5, ease: "easeInOut" }} // Smoother transition
->
-  <motion.p
-    className="text-lg font-medium text-gray-800"
-    initial={{ opacity: 0, y: 10 }} // Fade in + slight slide up
-    animate={hoveredIndex === index ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-    transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }} // Delayed effect for better feel
-  >
-    {feature.description}
-  </motion.p>
-</motion.div>
-
-
-            </motion.div>
-          ))}
-        </div>
-        <div className="mt-12 text-center">
-          <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 italic">
-            `Simplicity meets functionality{ "–"} effortless solutions for every business{"."}`
-          </p>
-        </div>
-
+    <section className="mt-5 relative bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen flex flex-col items-center justify-center py-16 px-6">
+      {/* Header */}
+      <div className="text-center mb-16 max-w-4xl">
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-blue-700 to-amber-500 bg-clip-text text-transparent mb-4">
+          Powerful Features for Modern Businesses
+        </h1>
+        <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
+          Everything you need to streamline operations and drive growth
+        </p>
       </div>
 
-      {/* Mobile Screen Section */}
-      <div className="block md:hidden w-full">
-        <div className="text-center mb-8 pt-16">
-          <motion.h1
-            className="text-3xl font-extrabold tracking-wide uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#1E40AF] to-[#F59E0B]"
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            Features
-          </motion.h1>
-          <motion.p
-            className="mt-2 text-base max-w-md mx-auto text-gray-700"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2 }}
-          >
-            SimsERP provides essential tools to grow your business.
-          </motion.p>
-        </div>
-        <div className="container mx-auto grid grid-cols-1 gap-6">
+      {/* Features Grid */}
+      <div className="container mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {featuresData.map((feature, index) => (
-            <motion.div
+            <div
               key={index}
-              className="relative bg-white shadow-md rounded-lg text-center border-b-2 border-[#1E40AF] transition-all duration-500 hover:shadow-lg hover:border-[#F59E0B] p-4"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
+              className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 p-6 border-b-4 border-blue-700 hover:border-amber-500 hover:-translate-y-1"
             >
-              <motion.h3
-                className="text-xl font-semibold text-black transition-all duration-500"
-                animate={{ color: hoveredIndex === index ? "#F59E0B" : "#1E40AF" }}
-              >
+              <div className="text-4xl mb-4">{feature.icon}</div>
+              <h3 className="text-2xl font-bold text-blue-700 group-hover:text-amber-500 transition-colors duration-300 mb-3">
                 {feature.title}
-              </motion.h3>
-              <p className="text-base text-gray-700 mt-2">{feature.description}</p>
-            </motion.div>
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                {feature.description}
+              </p>
+            </div>
           ))}
         </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="mt-16 text-center max-w-3xl">
+        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border-t-4 border-blue-700">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+            Ready to Transform Your Business?
+          </h2>
+          <p className="text-gray-600 mb-6 text-lg">
+            Join thousands of businesses already using simsERP to streamline their operations
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-300 shadow-lg hover:shadow-xl">
+              Start Free Trial
+            </button>
+            <button className="bg-white hover:bg-gray-50 text-blue-700 font-semibold px-8 py-3 rounded-lg border-2 border-blue-700 transition-colors duration-300">
+              Schedule Demo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Section */}
+      <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl w-full">
+        <div className="text-center">
+          <div className="text-3xl md:text-4xl font-bold text-blue-700 mb-2">10K+</div>
+          <div className="text-gray-600 text-sm md:text-base">Active Users</div>
+        </div>
+        <div className="text-center">
+          <div className="text-3xl md:text-4xl font-bold text-blue-700 mb-2">99.9%</div>
+          <div className="text-gray-600 text-sm md:text-base">Uptime</div>
+        </div>
+        <div className="text-center">
+          <div className="text-3xl md:text-4xl font-bold text-blue-700 mb-2">24/7</div>
+          <div className="text-gray-600 text-sm md:text-base">Support</div>
+        </div>
+        <div className="text-center">
+          <div className="text-3xl md:text-4xl font-bold text-blue-700 mb-2">50+</div>
+          <div className="text-gray-600 text-sm md:text-base">Integrations</div>
+        </div>
+      </div>
+
+      {/* Tagline */}
+      <div className="mt-12">
+        <p className="text-xl md:text-2xl font-semibold text-gray-700 italic">
+          Simplicity meets functionality – effortless solutions for every business.
+        </p>
       </div>
     </section>
   );

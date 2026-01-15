@@ -40,7 +40,7 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  if (!isLoaded) return null;
+  if (!isLoaded) return <PageLoader label="Loading..." />;
 
   const handleLogout = async () => {
     await signOut();

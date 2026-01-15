@@ -324,7 +324,7 @@ const getTicketDetails = async (req, res) => {
       tickets: [],
       openTickets: 0,
       closedTickets: 0,
-      repeatedCustomer: null,
+      repeatedCustomer: [],
       message: "No tickets found for this user",
     });
   }

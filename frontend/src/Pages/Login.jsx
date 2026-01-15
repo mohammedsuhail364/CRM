@@ -16,13 +16,7 @@ const Login = () => {
     }
   }, [isLoaded, isSignedIn, user, navigate]);
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <span className="text-gray-500 text-sm">Loading authentication…</span>
-      </div>
-    );
-  }
+  if (!isLoaded) return <PageLoader label="Authentication Loading..." />;
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-gradient-to-br from-blue-50 via-white to-amber-50">

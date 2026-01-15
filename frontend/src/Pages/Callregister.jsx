@@ -1,19 +1,17 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 // import { assets } from "../assets/assets";
-import { useCustomer } from "../Context/CustomerContext";
+import { useUser } from "@clerk/clerk-react";
 import axiosInstance from "../api/axiosInstance";
 import { useAuth } from "../Context/AuthContext";
+import { useCustomer } from "../Context/CustomerContext";
 
 const Callregister = () => {
-  
   const navigate = useNavigate();
   const location = useLocation();
   const [showNav, setShowNav] = useState(true);
   let lastScrollY = window.scrollY;
-  const userName = sessionStorage.getItem("userName");
-  const userEmail = sessionStorage.getItem("userEmail");
   const [ticketData, setTicketData] = useState([]);
   const [showTickets, setShowTickets] = useState(false);
   const dropdownRef = useRef(null);
@@ -22,16 +20,22 @@ const Callregister = () => {
   const { customer, setCustomer } = useCustomer();
   const { companyName } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  
+  const { isLoaded, user } = useUser();
+  const userName = user?.fullName;
+  const userEmail = user?.emailAddresses[0].emailAddress;
+
   const [newTicket, setNewTicket] = useState({
     ticketNumber: 0,
-    date: "",
-    user: userName,
+    date: new Date().toISOString().slice(0, 10),
+    user: userName || "",
     challenge: "",
     solution: "",
   });
+  // prevent flicker
+  if (!isLoaded) return <PageLoader label="Loading..." />;
   useEffect(() => {
-    if (sessionStorage.getItem("role") !== "user") {
+    const role = user?.publicMetadata?.role || "user";
+    if (role === "admin") {
       navigate("/admin");
     }
   }, []);
@@ -62,22 +66,32 @@ const Callregister = () => {
   }
 
   const handleAddTicket = () => {
-    if (
-      !newTicket.ticketNumber ||
-      !newTicket.date ||
-      !newTicket.user ||
-      !newTicket.challenge
-    ) {
-      alert("Please fill in all required fields (Solution is optional).");
+    const requiredFields = [
+      { key: "ticketNumber", label: "Ticket Number" },
+      { key: "date", label: "Date" },
+      { key: "user", label: "User" },
+      { key: "challenge", label: "Challenge" },
+    ];
+
+    const missing = requiredFields
+      .filter(({ key }) => {
+        const v = newTicket[key];
+        return v === undefined || v === null || String(v).trim() === "";
+      })
+      .map(({ label }) => label);
+
+    if (missing.length) {
+      alert(`Please fill: ${missing.join(", ")}`);
       return;
     }
+
     setTicketData([...ticketData, newTicket]);
     console.log(ticketData.length);
 
     addTicketService();
     setNewTicket(() => ({
       ticketNumber: newTicket.ticketNumber + 1, // Ensures ticket number increments correctly
-      date: "",
+      date: new Date().toISOString().slice(0, 10),
       user: userName,
       challenge: "",
       solution: "",
@@ -106,6 +120,8 @@ const Callregister = () => {
   };
   async function collectCustomerDataService() {
     const response = await axiosInstance.get("/customer/data");
+    console.log(response, "response");
+
     if (response.data.success) {
       setCustomer(response.data.data);
     }
@@ -201,12 +217,6 @@ const Callregister = () => {
       setShowTickets(true);
     }
   }, [companyName]);
-  const token=sessionStorage.getItem('token');
-  useEffect(()=>{
-    if(!token){
-      navigate('/login')
-    }
-  },[])
   return (
     <div className="h-screen flex flex-col bg-[#F8FAFC] p-2 items-center">
       {/* Floating Navigation - Appears when scrolling up */}
@@ -471,7 +481,11 @@ const Callregister = () => {
                       type: "number",
                       value: newTicket.ticketNumber,
                     },
-                    { name: "date", type: "date" },
+                    {
+                      name: "date",
+                      type: "date",
+                      value: new Date().toISOString().slice(0, 10),
+                    },
                     { name: "user", type: "text", value: userName },
                     { name: "challenge", type: "text" },
                     { name: "solution", type: "text" },

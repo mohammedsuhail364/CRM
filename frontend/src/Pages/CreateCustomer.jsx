@@ -2,12 +2,15 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
+
 
 const CustomerDetailsForm = () => {
   // State to manage form inputs
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [isNewCustomer, setIsNewCustomer] = useState(true);
+  const { isLoaded, user } = useUser();
   const [formData, setFormData] = useState({
     company: "",
     contactPerson: "",
@@ -67,9 +70,11 @@ const CustomerDetailsForm = () => {
       });
     }
   };
+  if (!isLoaded) return <PageLoader label="Loading..." />;
   useEffect(() => {
-    if (sessionStorage.getItem("role") !== "user") {
-      navigate("/admin");
+    const role = user?.publicMetadata?.role || "user";
+    if (role === "admin") {
+        navigate("/admin");
     }
   }, []);
 
@@ -143,13 +148,8 @@ const CustomerDetailsForm = () => {
       setLoading(false);
     }
   };
-  const token = sessionStorage.getItem("token");
-  useEffect(() => {
-    if (!token) {
-      navigate("/login");
-    }
-  }, []);
-  console.log(formData);
+
+  console.log({formData});
   
   return (
     <motion.div

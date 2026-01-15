@@ -22,7 +22,8 @@ const Dashboard = () => {
   const [repeatedCustomers, setRepeatedCustomers] = useState([]);
 
   const pendingTickets = openTicketsCount - closedTickets;
-
+  // prevent flicker
+  if (!isLoaded) return <PageLoader label="Loading..." />;
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > lastScrollY) {
@@ -37,10 +38,10 @@ const Dashboard = () => {
   }, []);
 
   async function collectTicketDetails() {
-    if(!user) return
-    const userEmail=user.emailAddresses[0].emailAddress
-    console.log(user,"suhail");
-    
+    if (!user) return;
+    const userEmail = user.emailAddresses[0].emailAddress;
+    console.log(user, "suhail");
+
     const response = await axiosInstance.get("/employee/get-ticket-details", {
       params: { userEmail },
     });
@@ -53,17 +54,15 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    // if (!token) {
-    //   navigate("/login");
-    // }
-    // setCompanyName(null);
-    // collectTicketDetails();
-  }, []);
-
-  useEffect(() => {
-    // if (sessionStorage.getItem("role") !== "user") {
-    //   navigate("/admin");
-    // }
+    if (isSignedIn) {
+      const role = user?.publicMetadata?.role || "user";
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        setCompanyName(null);
+        collectTicketDetails();
+      }
+    }
   }, []);
 
   return (
@@ -103,7 +102,9 @@ const Dashboard = () => {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1E40AF]">
               Welcome to the Dashboard
             </h1>
-            <p className="text-base sm:text-lg text-gray-700 mt-2">Hello, User!</p>
+            <p className="text-base sm:text-lg text-gray-700 mt-2">
+              Hello, User!
+            </p>
             <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
               <button
                 className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 bg-[#F59E0B] text-white rounded-full shadow-lg hover:bg-[#1E40AF] transition text-sm sm:text-base"
@@ -132,23 +133,38 @@ const Dashboard = () => {
         </div>
 
         {/* Ticket Record Stats */}
-        <div id="records-section" className="w-full max-w-6xl mx-auto mt-8 sm:mt-10">
+        <div
+          id="records-section"
+          className="w-full max-w-6xl mx-auto mt-8 sm:mt-10"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-center">
             <div className="bg-[#1E40AF] p-4 sm:p-6 rounded-xl shadow-lg text-white">
               <h2 className="text-lg sm:text-xl font-semibold">Open Tickets</h2>
-              <p className="text-3xl sm:text-4xl font-bold mt-1">{openTicketsCount}</p>
+              <p className="text-3xl sm:text-4xl font-bold mt-1">
+                {openTicketsCount}
+              </p>
             </div>
             <div className="bg-[#F59E0B] p-4 sm:p-6 rounded-xl shadow-lg text-white">
               <h2 className="text-lg sm:text-xl font-semibold">Closed Today</h2>
-              <p className="text-3xl sm:text-4xl font-bold mt-1">{closedTickets}</p>
+              <p className="text-3xl sm:text-4xl font-bold mt-1">
+                {closedTickets}
+              </p>
             </div>
             <div className="bg-[#1E40AF] p-4 sm:p-6 rounded-xl shadow-lg text-white">
-              <h2 className="text-lg sm:text-xl font-semibold">Pending Tickets</h2>
-              <p className="text-3xl sm:text-4xl font-bold mt-1">{pendingTickets}</p>
+              <h2 className="text-lg sm:text-xl font-semibold">
+                Pending Tickets
+              </h2>
+              <p className="text-3xl sm:text-4xl font-bold mt-1">
+                {pendingTickets}
+              </p>
             </div>
             <div className="bg-[#F59E0B] p-4 sm:p-6 rounded-xl shadow-lg text-white">
-              <h2 className="text-lg sm:text-xl font-semibold">Repeated Companies</h2>
-              <p className="text-lg sm:text-xl mt-1">{repeatedCustomers.length}</p>
+              <h2 className="text-lg sm:text-xl font-semibold">
+                Repeated Companies
+              </h2>
+              <p className="text-3xl sm:text-4xl font-bold mt-1">
+                {repeatedCustomers.length}
+              </p>
             </div>
           </div>
 
@@ -177,7 +193,9 @@ const Dashboard = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">No open tickets for today</p>
+              <p className="text-gray-500 text-center py-8">
+                No open tickets for today
+              </p>
             )}
           </div>
         </div>

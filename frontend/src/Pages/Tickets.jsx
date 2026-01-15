@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { useAuth } from "../Context/AuthContext";
+import { useUser } from "@clerk/clerk-react";
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
@@ -12,8 +13,9 @@ const Tickets = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ticketsPerPage = 10;
+  const { isLoaded, user } = useUser();
+  const userEmail= user?.emailAddresses[0].emailAddress;
 
-  const userEmail = sessionStorage.getItem("userEmail");
   const { setCompanyName } = useAuth();
   const navigate = useNavigate();
 
@@ -46,27 +48,34 @@ const Tickets = () => {
     switch (type) {
       case "today":
         filteredData = tickets.filter(
-          (ticket) => new Date(ticket.date).toDateString() === currentDate.toDateString()
+          (ticket) =>
+            new Date(ticket.date).toDateString() === currentDate.toDateString()
         );
         break;
       case "lastWeek":
         const lastWeekDate = new Date();
         lastWeekDate.setDate(currentDate.getDate() - 7);
         filteredData = tickets.filter(
-          (ticket) => new Date(ticket.date) >= lastWeekDate && new Date(ticket.date) <= currentDate
+          (ticket) =>
+            new Date(ticket.date) >= lastWeekDate &&
+            new Date(ticket.date) <= currentDate
         );
         break;
       case "lastMonth":
         const lastMonthDate = new Date();
         lastMonthDate.setMonth(currentDate.getMonth() - 1);
         filteredData = tickets.filter(
-          (ticket) => new Date(ticket.date) >= lastMonthDate && new Date(ticket.date) <= currentDate
+          (ticket) =>
+            new Date(ticket.date) >= lastMonthDate &&
+            new Date(ticket.date) <= currentDate
         );
         break;
       case "custom":
         if (startDate && endDate) {
           filteredData = tickets.filter(
-            (ticket) => new Date(ticket.date) >= new Date(startDate) && new Date(ticket.date) <= new Date(endDate)
+            (ticket) =>
+              new Date(ticket.date) >= new Date(startDate) &&
+              new Date(ticket.date) <= new Date(endDate)
           );
         }
         break;
@@ -108,19 +117,12 @@ const Tickets = () => {
     }
   };
 
-  const token = sessionStorage.getItem("token");
-
+  if (!isLoaded) return <PageLoader label="Loading..." />;
   useEffect(() => {
-    if (!token) navigate("/login");
-  }, []);
-
-  useEffect(() => {
-    if (sessionStorage.getItem("role") !== "user") {
+    const role = user?.publicMetadata?.role || "user";
+    if (role === "admin") {
       navigate("/admin");
     }
-  }, []);
-
-  useEffect(() => {
     setCompanyName(null);
     collectAllTicketsService();
   }, []);
@@ -128,28 +130,70 @@ const Tickets = () => {
   // Pagination logic
   const indexOfLastTicket = currentPage * ticketsPerPage;
   const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
-  const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
+  const currentTickets = filteredTickets.slice(
+    indexOfFirstTicket,
+    indexOfLastTicket
+  );
   const totalPages = Math.ceil(filteredTickets.length / ticketsPerPage);
 
   return (
     <div className="p-6">
-      <h2 className="text-3xl font-bold text-[#1E40AF] mb-2 mt-20">🎟️ Tickets</h2>
-      <p className="text-gray-600 mb-6">Manage and track all customer tickets efficiently.</p>
+      <h2 className="text-3xl font-bold text-[#1E40AF] mb-2 mt-20">
+        🎟️ Tickets
+      </h2>
+      <p className="text-gray-600 mb-6">
+        Manage and track all customer tickets efficiently.
+      </p>
 
       {/* Filters */}
       <div className="mb-4 flex gap-4 flex-wrap">
-        <button onClick={() => handleFilterChange("today")} className="px-4 py-2 bg-blue-500 text-white rounded-md">Today</button>
-        <button onClick={() => handleFilterChange("lastWeek")} className="px-4 py-2 bg-blue-500 text-white rounded-md">Last Week</button>
-        <button onClick={() => handleFilterChange("lastMonth")} className="px-4 py-2 bg-blue-500 text-white rounded-md">Last Month</button>
-        <button onClick={() => handleFilterChange("custom")} className="px-4 py-2 bg-blue-500 text-white rounded-md">Custom Range</button>
+        <button
+          onClick={() => handleFilterChange("today")}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md"
+        >
+          Today
+        </button>
+        <button
+          onClick={() => handleFilterChange("lastWeek")}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md"
+        >
+          Last Week
+        </button>
+        <button
+          onClick={() => handleFilterChange("lastMonth")}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md"
+        >
+          Last Month
+        </button>
+        <button
+          onClick={() => handleFilterChange("custom")}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md"
+        >
+          Custom Range
+        </button>
       </div>
 
       {/* Custom Date Inputs */}
       {filterType === "custom" && (
         <div className="flex gap-4 mb-4 flex-wrap">
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border px-3 py-2 rounded-md" />
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border px-3 py-2 rounded-md" />
-          <button onClick={() => filterTickets("custom")} className="px-4 py-2 bg-blue-500 text-white rounded-md">Apply</button>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="border px-3 py-2 rounded-md"
+          />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="border px-3 py-2 rounded-md"
+          />
+          <button
+            onClick={() => filterTickets("custom")}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+          >
+            Apply
+          </button>
         </div>
       )}
 
@@ -167,7 +211,9 @@ const Tickets = () => {
       {/* Table */}
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg p-4">
         {currentTickets.length === 0 ? (
-          <p className="text-center text-gray-600 text-lg font-semibold">No tickets available</p>
+          <p className="text-center text-gray-600 text-lg font-semibold">
+            No tickets available
+          </p>
         ) : (
           <table className="w-full border border-gray-300 rounded-md">
             <thead>
@@ -187,24 +233,48 @@ const Tickets = () => {
             </thead>
             <tbody>
               {currentTickets.map((ticket, index) => (
-                <tr key={index} className="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition">
+                <tr
+                  key={index}
+                  className="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition"
+                >
                   <td className="border p-3">{ticket.ticketNumber}</td>
                   <td className="border p-3">{ticket.date}</td>
                   <td className="border p-3">{ticket.user}</td>
                   <td className="border p-3">{ticket.challenge}</td>
-                  <td className="border p-3">{ticket.solution || "Not provided"}</td>
-                  <td className={`border p-3 font-semibold ${ticket.solvedDate ? "text-green-600" : "text-yellow-600"}`}>
-                    {ticket.solvedDate ? "Closed" : (
-                      <button onClick={() => handleViewPending(ticket.ticketNumber)} className="cursor-pointer underline">
+                  <td className="border p-3">
+                    {ticket.solution || "Not provided"}
+                  </td>
+                  <td
+                    className={`border p-3 font-semibold ${
+                      ticket.solvedDate ? "text-green-600" : "text-yellow-600"
+                    }`}
+                  >
+                    {ticket.solvedDate ? (
+                      "Closed"
+                    ) : (
+                      <button
+                        onClick={() => handleViewPending(ticket.ticketNumber)}
+                        className="cursor-pointer underline"
+                      >
                         View Pending
                       </button>
                     )}
                   </td>
-                  <td className="border p-3">{ticket.companyDetails?.company || "N/A"}</td>
-                  <td className="border p-3">{ticket.companyDetails?.serialNo || "N/A"}</td>
-                  <td className="border p-3">{ticket.companyDetails?.gstNumber || "N/A"}</td>
-                  <td className="border p-3">{ticket.companyDetails?.mobileNumber1 || "N/A"}</td>
-                  <td className="border p-3">{ticket.companyDetails?.contactPerson || "N/A"}</td>
+                  <td className="border p-3">
+                    {ticket.companyDetails?.company || "N/A"}
+                  </td>
+                  <td className="border p-3">
+                    {ticket.companyDetails?.serialNo || "N/A"}
+                  </td>
+                  <td className="border p-3">
+                    {ticket.companyDetails?.gstNumber || "N/A"}
+                  </td>
+                  <td className="border p-3">
+                    {ticket.companyDetails?.mobileNumber1 || "N/A"}
+                  </td>
+                  <td className="border p-3">
+                    {ticket.companyDetails?.contactPerson || "N/A"}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -225,7 +295,9 @@ const Tickets = () => {
               Page {currentPage} of {totalPages}
             </span>
             <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
               className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md disabled:opacity-50"
             >
